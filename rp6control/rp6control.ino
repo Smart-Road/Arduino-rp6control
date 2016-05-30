@@ -29,41 +29,23 @@ String commandline;
 // specify the port to listen on as an argument
 WiFiServer server(80);
 
-const int maxClientCount = 20;
+const uint32_t maxClientCount = 20;
 
 WiFiClient client[maxClientCount];
 const size_t clientsize = sizeof(client) / sizeof (client[0]);
 bool connectionlist[clientsize];
 
-  SerialCommunication clientCommunication[] {
-  SerialCommunication(&client[0], '#', '%'),
-  SerialCommunication(&client[1], '#', '%'),
-  SerialCommunication(&client[2], '#', '%'),
-  SerialCommunication(&client[3], '#', '%'),
-  SerialCommunication(&client[4], '#', '%'),
-  SerialCommunication(&client[5], '#', '%'),
-  SerialCommunication(&client[6], '#', '%'),
-  SerialCommunication(&client[7], '#', '%'),
-  SerialCommunication(&client[8], '#', '%'),
-  SerialCommunication(&client[9], '#', '%'),
-  SerialCommunication(&client[10], '#', '%'),
-  SerialCommunication(&client[11], '#', '%'),
-  SerialCommunication(&client[12], '#', '%'),
-  SerialCommunication(&client[13], '#', '%'),
-  SerialCommunication(&client[14], '#', '%'),
-  SerialCommunication(&client[15], '#', '%'),
-  SerialCommunication(&client[16], '#', '%'),
-  SerialCommunication(&client[17], '#', '%'),
-  SerialCommunication(&client[18], '#', '%'),
-  SerialCommunication(&client[19], '#', '%')
-  };
+SerialCommunication clientCommunication[maxClientCount];
 
 void setup() {
-  
-  //start of the Rp6
+  // setup all the SerialCommunication objects
+  for (uint32_t i = 0; i < maxClientCount; i++) {
+    clientCommunication[i].begin(client[i], '#', '%');
+  }
+  // start of the Rp6
   Rp6.begin();
-  //init array on false
-  for (int i = 0; i < clientsize; i++) {
+  // init array on false
+  for (uint32_t i = 0; i < clientsize; i++) {
     connectionlist[i] = false;
   }
   Serial.begin(9600);
@@ -106,7 +88,7 @@ void loop() {
     clientCounter++;
     clientCounter = clientCounter % clientsize;
   }
-  for (size_t j = 0; j < clientsize; j++) {
+  for (uint32_t j = 0; j < clientsize; j++) {
     if (client[j].available() > 0) {
       if (clientCommunication[j].update()) {
         commandline = clientCommunication[j].getCommand();
