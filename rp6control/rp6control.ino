@@ -13,8 +13,8 @@
 
 //For the people that downloaded this from github, use the shareddata header.
 //I've done it like this so my credentials are hidden for the scary internet.
-#include "privatedata.h"
-//#include "shareddata.h"
+//#include "privatedata.h"
+#include "shareddata.h"
 #include <ESP8266WiFi.h>
 #include <SoftwareSerial.h>
 #include <Rp6.h>
@@ -96,6 +96,9 @@ void robotAction() {
     case State::Right:
       rightSpeed *= 0.5;
       break;
+    default:
+      rightSpeed *= 0;
+      leftSpeed *= 0;
   }
   if (millis() % 2000 == 0) {
     Serial.printf("LEFT: %d, RIGHT: %d\n", leftSpeed, rightSpeed);
