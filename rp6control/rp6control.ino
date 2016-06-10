@@ -24,7 +24,7 @@ State state = State::Startup;
 SoftwareSerial Comport(D7, D8);
 
 int robotSpeed = 0;
-
+float invertedRotateSpeed = 0; // can be 0 through 1, the higher it is, the slower the robot rotates
 // Create an instance of the server
 // specify the port to listen on as an argument
 WiFiServer server(80);
@@ -41,7 +41,7 @@ void setup() {
   // setup all the SerialCommunication objects
   for (uint32_t i = 0; i < maxClientCount; i++)
   {
-    clientCommunication[i].begin(client[i], '#', '%');
+    clientCommunication[i].begin(client[i], '%', '$');
   }
   // start of the Rp6
   Rp6.begin();
@@ -91,29 +91,27 @@ void robotAction() {
       // keep it at robotSpeed
       break;
     case State::Left:
-      leftSpeed *= 0.5;
+      leftSpeed *= invertedRotateSpeed;
       break;
     case State::Right:
-      rightSpeed *= 0.5;
+      rightSpeed *= invertedRotateSpeed;
       break;
     default:
       rightSpeed *= 0;
       leftSpeed *= 0;
   }
-  if (millis() % 2000 == 0) {
-    Serial.printf("LEFT: %d, RIGHT: %d\n", leftSpeed, rightSpeed);
-  }
-  //Rp6.moveAtSpeed(leftSpeed, rightSpeed);
+  Rp6.moveAtSpeed(leftSpeed, rightSpeed);
 }
 
 void connection() {
   static size_t clientCounter = 0;
   if (server.hasClient())
   {
-    if (client[clientCounter] == NULL || !client[clientCounter].connected())
+    if (client[clientCounter] == 0 ||
+        !client[clientCounter].connected())
     {
       client[clientCounter] = server.available();
-      //Serial.printf("Client(%d) has connected.\n", clientCounter);
+      Serial.printf("Client(%d) has connected.\n", clientCounter);
       connectionlist[clientCounter] = true;
     }
     else
@@ -132,7 +130,6 @@ void connection() {
       if (clientCommunication[j].update())
       {
         commandline = clientCommunication[j].getCommand();
-        Serial.println(commandline);
       }
     }
     else if (connectionlist[j])
@@ -140,7 +137,7 @@ void connection() {
       connectionlist[j] = client[j].connected();
       if (!connectionlist[j])
       {
-        //Serial.printf("Client(%d) has disconnected.\n", j);
+        Serial.printf("Client(%d) has disconnected.\n", j);
       }
     }
     useCommand(commandline);
@@ -153,30 +150,8 @@ void useCommand(const String command) {
     int paramcheck = command.indexOf(":");
     if (paramcheck > 0) {
       useCommandWithParams(command);
-    }
-    else
-    {
-      if (command == "RIGHT")
-      {
-        state = State::Right;
-      }
-      else if (command == "LEFT")
-      {
-        state = State::Left;
-      }
-      else if (command == "BACKWARD")
-      {
-        // TODO: set robot direction to backwards
-        state = State::Backward;
-      }
-      else if (command == "FORWARD") {
-        // TODO: set robot direction to forward
-        state = State::Forward;
-      }
-      else
-      {
-        Serial.println("NACK");
-      }
+    } else {
+      Serial.println("NACK");
     }
   }
 }
@@ -185,14 +160,39 @@ void useCommandWithParams(const String command) {
   int endCommand = command.indexOf(":");
   String beginCommand = command.substring(0, endCommand);
   String parameter = command.substring(endCommand + 1);
-  Serial.println(beginCommand + " " + parameter);
+  Serial.println("begincommand:" + beginCommand + ", parameter:" + parameter);
 
   if (beginCommand == "SPEED") {
     setRobotSpeed(parameter.toInt());
   }
+  
+  if (beginCommand == "DIRECTION") {
+    if (parameter == "RIGHT")
+    {
+      state = State::Right;
+    }
+    else if (parameter == "LEFT")
+    {
+      state = State::Left;
+    }
+    else if (parameter == "BACKWARD")
+    {
+      Rp6.changeDirection(RP6_BACKWARD);
+      state = State::Backward;
+    }
+    else if (parameter == "FORWARD") {
+      Rp6.changeDirection(RP6_FORWARD);
+      state = State::Forward;
+    }
+    else
+    {
+      Serial.println("NACK");
+    }
+  }
 }
 
 void setRobotSpeed(int speedParam) {
+  speedParam = map(speedParam, 0, 130, 0, 200);
   if (speedParam > 0 || speedParam < 200) {
     robotSpeed = speedParam;
   } else if (speedParam > 200) {
