@@ -1,4 +1,4 @@
-#include <SerialCommunication.h>
+#include "SerialCommunication.h"
 
 /*
    Only works with one concurrent connection.
