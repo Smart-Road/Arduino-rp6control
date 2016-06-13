@@ -19,12 +19,15 @@
 #include <SoftwareSerial.h>
 #include <Rp6.h>
 
+#define DEBUG 1
+
 enum class State { Forward, Backward, Left, Right, Startup };
 State state = State::Startup;
 SoftwareSerial Comport(D7, D8);
 
 int robotSpeed = 0;
-float invertedRotateSpeed = 0; // can be 0 through 1, the higher it is, the slower the robot rotates
+float invertedRotateSpeed = 0; // can be 0 to 1, the higher it is, the slower the robot rotates
+
 // Create an instance of the server
 // specify the port to listen on as an argument
 WiFiServer server(80);
@@ -54,24 +57,24 @@ void setup() {
 
   Comport.begin(9600);
   // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  DebugPrintln("");
+  DebugPrintln("");
+  DebugPrint("Connecting to ");
+  DebugPrintln(ssid);
 
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    Serial.print(".");
+    DebugPrint(".");
   }
-  Serial.println("");
-  Serial.println("WiFi connected");
+  DebugPrintln("");
+  DebugPrintln("WiFi connected");
 
   // Start the server
   server.begin();
-  Serial.println("Server started");
+  DebugPrintln("Server started");
 
   // Print the IP address
   Serial.println(WiFi.localIP());
@@ -83,24 +86,24 @@ void loop() {
 }
 
 void robotAction() {
-  int leftSpeed = robotSpeed;
-  int rightSpeed = robotSpeed;
   switch (state) {
     case State::Forward:
     case State::Backward:
       // keep it at robotSpeed
+      Rp6.moveAtSpeed(robotSpeed, robotSpeed);
       break;
     case State::Left:
-      leftSpeed *= invertedRotateSpeed;
+      //Rp6.rotate(robotSpeed, RP6_LEFT, 10); // 10 degrees, will this work right?
+      Rp6.moveAtSpeed(robotSpeed * invertedRotateSpeed, robotSpeed);
       break;
     case State::Right:
-      rightSpeed *= invertedRotateSpeed;
+      //Rp6.rotate(robotSpeed, RP6_RIGHT, 10); // same as above
+      Rp6.moveAtSpeed(robotSpeed, robotSpeed * invertedRotateSpeed);
       break;
     default:
-      rightSpeed *= 0;
-      leftSpeed *= 0;
+      Rp6.moveAtSpeed(0, 0);
+      break;
   }
-  Rp6.moveAtSpeed(leftSpeed, rightSpeed);
 }
 
 void connection() {
@@ -111,13 +114,19 @@ void connection() {
         !client[clientCounter].connected())
     {
       client[clientCounter] = server.available();
-      Serial.printf("Client(%d) has connected.\n", clientCounter);
+      //Serial.printf("Client(%d) has connected.\n", clientCounter);
+      DebugPrint("Client("); 
+      DebugPrint(String(clientCounter));
+      DebugPrintln(") has connected.");
       connectionlist[clientCounter] = true;
     }
     else
     {
-      Serial.printf("ERROR: Client(%d) still connected.\n", clientCounter);
-      Serial.println("Trying next client.");
+      //Serial.printf("ERROR: Client(%d) still connected.\n", clientCounter);
+      DebugPrint("ERROR: Client(");
+      DebugPrint(String(clientCounter));
+      DebugPrintln(") still connected.");
+      DebugPrintln("Trying next client.");
     }
     clientCounter++;
     clientCounter = clientCounter % clientsize;
@@ -137,7 +146,10 @@ void connection() {
       connectionlist[j] = client[j].connected();
       if (!connectionlist[j])
       {
-        Serial.printf("Client(%d) has disconnected.\n", j);
+        //Serial.printf("Client(%d) has disconnected.\n", j);
+        DebugPrint("Client(");
+        DebugPrint(String(j));
+        DebugPrint(") has disconnected.");
       }
     }
     useCommand(commandline);
@@ -151,7 +163,7 @@ void useCommand(const String command) {
     if (paramcheck > 0) {
       useCommandWithParams(command);
     } else {
-      Serial.println("NACK");
+      DebugPrintln("NACK");
     }
   }
 }
@@ -160,13 +172,15 @@ void useCommandWithParams(const String command) {
   int endCommand = command.indexOf(":");
   String beginCommand = command.substring(0, endCommand);
   String parameter = command.substring(endCommand + 1);
-  Serial.println("begincommand:" + beginCommand + ", parameter:" + parameter);
+  DebugPrintln("begincommand:" + beginCommand + ", parameter:" + parameter);
 
   if (beginCommand == "SPEED") {
     setRobotSpeed(parameter.toInt());
   }
-  
-  if (beginCommand == "DIRECTION") {
+  else if (beginCommand == "ANGLE") {
+    setTurningAngle(parameter.toInt());
+  }
+  else if (beginCommand == "DIRECTION") {
     if (parameter == "RIGHT")
     {
       state = State::Right;
@@ -186,8 +200,11 @@ void useCommandWithParams(const String command) {
     }
     else
     {
-      Serial.println("NACK");
+      DebugPrintln("NACK");
     }
+  }
+  else {
+    DebugPrintln("NACK");
   }
 }
 
@@ -200,6 +217,32 @@ void setRobotSpeed(int speedParam) {
   } else {
     robotSpeed = 0;
   }
-  Serial.printf("Speed set to %d\n", robotSpeed);
+  //Serial.printf("Speed set to %d\n", robotSpeed);
+  DebugPrint("Speed set to ");
+  DebugPrintln(String(robotSpeed));
+}
+
+void setTurningAngle(int angle) {
+  if (angle < 0 || angle > 100) {
+    DebugPrintln("An error occured");
+    return;
+  }
+  double angleDouble = angle;
+  double rotateSpeed = angleDouble / 100;
+  invertedRotateSpeed = 1.0 - rotateSpeed;
+  DebugPrint("InvSpeed:");
+  DebugPrintln(String(invertedRotateSpeed));
+}
+
+void DebugPrint(String message) {
+#if DEBUG
+  Serial.print(message);
+#endif
+}
+
+void DebugPrintln(String message) {
+#if DEBUG
+  Serial.println(message);
+#endif
 }
 
