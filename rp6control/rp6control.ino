@@ -77,7 +77,7 @@ void setup() {
   DebugPrintln("Server started");
 
   // Print the IP address
-  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.localIP()); // does not work with debugprintln, and is pretty handy anyway
 }
 
 void loop() {
