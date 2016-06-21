@@ -154,7 +154,7 @@ void connection() {
         //Serial.printf("Client(%d) has disconnected.\n", j);
         DebugPrint("Client(");
         DebugPrint(String(j));
-        DebugPrint(") has disconnected.");
+        DebugPrintln(") has disconnected.");
       }
     }
     if (j == controller) {

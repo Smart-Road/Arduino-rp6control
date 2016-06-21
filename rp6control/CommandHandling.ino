@@ -50,8 +50,6 @@ int parseCommand(const String command, int commands[2]) { // commands has to be 
   if (command == NULL) {
     return -1;
   }
-  DebugPrint("Command received:");
-  DebugPrintln(command);
   int paramcheck = command.indexOf(":");
   if (paramcheck < 0) { // if no parameter is given
     DebugPrintln("ERROR:Command without parameter was given to parser");
