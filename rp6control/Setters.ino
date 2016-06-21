@@ -1,9 +1,14 @@
+#include <stdio.h>
+
+const int maxRobotSpeed = 200;
+const int minRobotSpeed = 0;
+
 void setRobotSpeed(int speedParam) {
-  speedParam = map(speedParam, 0, 130, 0, 200);
-  if (speedParam > 0 || speedParam < 200) {
+  speedParam = map(speedParam, 0, 130, minRobotSpeed, maxRobotSpeed);
+  if (speedParam >= minRobotSpeed && speedParam <= maxRobotSpeed) {
     robotSpeed = speedParam;
-  } else if (speedParam > 200) {
-    robotSpeed = 200;
+  } else if (speedParam > maxRobotSpeed) {
+    robotSpeed = maxRobotSpeed;
   } else {
     robotSpeed = 0;
   }
@@ -20,7 +25,7 @@ void setTurningAngle(int angle) {
   double angleDouble = angle;
   double rotateSpeed = angleDouble / 100;
   invertedRotateSpeed = 1.0 - rotateSpeed;
-  DebugPrint("InvSpeed:");
+  DebugPrint("Inverted angle:");
   DebugPrintln(String(invertedRotateSpeed));
 }
 
@@ -33,6 +38,40 @@ void checkAndSetController(const String sCommand, int clientId) {
   int command = commands[0];
   if (command == CONTROL) {
     controller = clientId;
-    DebugPrintln("Controller connected.");
+    String sController = getParamString(sCommand);
+    DebugPrint("Controller (");
+    DebugPrint(sController);
+    DebugPrintln(") connected.");
   }
 }
+
+void parseAndSetServerIp(String sIp) {
+  // parse ip, put it in ipPieces
+  const int ipPiecesSize = 4;
+  int ipPieces[ipPiecesSize];
+  int ipPieceIndex = 0;
+  String s = "";
+  for (size_t i = 0; i < sIp.length(); i++) {
+    char readChar = sIp.charAt(i);
+    if (readChar != '.') {
+      s += readChar;
+    } else {
+      ipPieces[ipPieceIndex] = s.toInt();
+      s = "";
+      ipPieceIndex++;
+    }
+  }
+  ipPieces[3] = s.toInt();
+
+  // debug print all values of ipPieces
+  DebugPrint("Ip address values:");
+  for (int i = 0; i < ipPiecesSize; i++) {
+    DebugPrint(String(ipPieces[i]));
+    DebugPrint(" ");
+  }
+  DebugPrintln("");
+  
+  // set ip to the right ip address
+  pcClientIp = IPAddress(ipPieces[0], ipPieces[1], ipPieces[2], ipPieces[3]);
+}
+

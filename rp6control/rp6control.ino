@@ -20,7 +20,7 @@
 #include <SoftwareSerial.h>
 #include <Rp6.h>
 
-#define DEBUG 0
+#define DEBUG (1)
 
 enum class State { Forward, Backward, Left, Right, Startup };
 State state = State::Startup;
@@ -29,9 +29,10 @@ SoftwareSerial Comport(D7, D8);
 int robotSpeed = 0;
 float invertedRotateSpeed = 0; // can be 0 to 1, the higher it is, the slower the robot rotates
 
+const int serverPortnumber = 80;
 // Create an instance of the server
 // specify the port to listen on as an argument
-WiFiServer server(80);
+WiFiServer server(serverPortnumber);
 
 const uint32_t maxClientCount = 20;
 
@@ -41,9 +42,15 @@ bool connectionlist[clientsize];
 
 int controller = -1;
 
+const int pcClientPortnumber = 13;
+IPAddress pcClientIp(0, 0, 0, 0); // should be 0,0,0,0
+WiFiClient pcClient;
+bool connectionWithPc = false;
+
 SerialCommunication clientCommunication[maxClientCount];
 
 void setup() {
+
   // setup all the SerialCommunication objects
   for (uint32_t i = 0; i < maxClientCount; i++)
   {
@@ -56,7 +63,7 @@ void setup() {
   {
     connectionlist[i] = false;
   }
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   Comport.begin(9600);
   // Connect to WiFi network
@@ -109,6 +116,27 @@ void robotAction() {
 
 void connection() {
   static size_t clientCounter = 0;
+  static int connectionTryCounter = 0;
+  const int connectionTries = 1;
+  
+  connectionWithPc = pcClient.connected();
+  if (!connectionWithPc && pcClientIp != IPAddress(0,0,0,0) && connectionTryCounter < connectionTries) {
+    
+    connectionWithPc = true;
+    if (pcClient.connect(pcClientIp, pcClientPortnumber)) {
+      connectionTryCounter = 0;
+      
+      DebugPrintln("hello connection with pc client!");
+      SendMessage(pcClient, "zone:15");
+    } else {
+      connectionTryCounter++;
+      DebugPrintln("trycounter got up by one");
+    }
+  } else if (connectionTryCounter == 1) { // only for debugging
+    connectionTryCounter++;
+    DebugPrintln("Stopped trying to connect");
+  }
+  
   if (server.hasClient())
   {
     if (client[clientCounter] == 0 ||
@@ -150,6 +178,8 @@ void connection() {
         if (j == controller) {
           DebugPrintln("Controller disconnected.");
           controller = -1;
+          connectionTryCounter = 0;
+          pcClientIp = IPAddress(0, 0, 0, 0);
         }
         //Serial.printf("Client(%d) has disconnected.\n", j);
         DebugPrint("Client(");
@@ -158,7 +188,9 @@ void connection() {
       }
     }
     if (j == controller) {
-      useCommand(commandline);
+      if (commandline.length() > 0) {
+        useCommand(commandline);
+      }
     } else if ( controller < 0) {
       checkAndSetController(commandline, j);
     } else {
