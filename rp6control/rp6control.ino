@@ -20,7 +20,7 @@
 #include <SoftwareSerial.h>
 #include <Rp6.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 enum class State { Forward, Backward, Left, Right, Startup };
 State state = State::Startup;
