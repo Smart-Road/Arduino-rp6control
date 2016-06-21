@@ -9,16 +9,16 @@
 
 #define BEGINDELIMITER '%'
 #define ENDDELIMITER '$'
-#define MAX_COMMAND_LENGTH 20
+#define MAX_COMMAND_LENGTH 50
 
 enum class Communication { WaitForStart, Receiving };
 
 
 class SerialCommunication {
   private:
-	bool _isStarted;
-	char _beginDelimiter;
-	char _endDelimiter;
+  	bool _isStarted;
+  	char _beginDelimiter;
+  	char _endDelimiter;
     String _data;
     char _incomingChar;
     String _receivedString;
@@ -27,8 +27,8 @@ class SerialCommunication {
     String _lastCommand;
     void reset();
   public:
-	SerialCommunication();
-	void begin(Stream &theStream, char beginDelimiter = '%', char endDelimiter = '$');
+  	SerialCommunication();
+  	void begin(Stream &theStream, char beginDelimiter = '%', char endDelimiter = '$');
     String getCommand();
     bool update();
 };
