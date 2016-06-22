@@ -4,7 +4,7 @@
 void SendMessage(WiFiClient wfclient, String message) {
   String messageToSend = BEGINDELIMITER + message + ENDDELIMITER;
   wfclient.print(messageToSend);
-  DebugPrintln("Sent message " + messageToSend + " to client");
+  DEBUG(Serial.println("Sent message " + messageToSend + " to client"))
 }
 
 #undef BEGINDELIMITER

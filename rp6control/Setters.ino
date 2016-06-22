@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 const int maxRobotSpeed = 200;
 const int minRobotSpeed = 0;
 
@@ -12,26 +10,23 @@ void setRobotSpeed(int speedParam) {
   } else {
     robotSpeed = 0;
   }
-  //Serial.printf("Speed set to %d\n", robotSpeed);
-  DebugPrint("Speed set to ");
-  DebugPrintln(String(robotSpeed));
+  DEBUG(Serial.printf("Speed set to %d\n", robotSpeed))
 }
 
 void setTurningAngle(int angle) {
   if (angle < 0 || angle > 100) {
-    DebugPrintln("An error occured");
+    DEBUG(Serial.println("An error occured"))
     return;
   }
   double angleDouble = angle;
   double rotateSpeed = angleDouble / 100;
   invertedRotateSpeed = 1.0 - rotateSpeed;
-  DebugPrint("Inverted angle:");
-  DebugPrintln(String(invertedRotateSpeed));
+  DEBUG(Serial.printf("Inverted angle:%f\n", invertedRotateSpeed))
 }
 
 bool checkAndSetController(const String sCommand, int clientId) {
   int commands[2];
-  if (!parseCommand(sCommand, commands)) {
+  if (!parseCommand(sCommand, commands) != 0) {
     return false;
   }
 
@@ -39,9 +34,7 @@ bool checkAndSetController(const String sCommand, int clientId) {
   if (command == CONTROL) {
     controller = clientId;
     String sController = getParamString(sCommand);
-    DebugPrint("Controller (");
-    DebugPrint(sController);
-    DebugPrintln(") connected.");
+    DEBUG(Serial.println("Controller(" + sController + ") connected."))
     return true;
   }
   return false;
@@ -66,12 +59,11 @@ void parseAndSetServerIp(String sIp) {
   ipPieces[3] = s.toInt();
 
   // debug print all values of ipPieces
-  DebugPrint("Ip address values:");
+  DEBUG(Serial.print("Ip address values:"))
   for (int i = 0; i < ipPiecesSize; i++) {
-    DebugPrint(String(ipPieces[i]));
-    DebugPrint(" ");
+    DEBUG(Serial.print(String(ipPieces[i]) + " "))
   }
-  DebugPrintln("");
+  DEBUG(Serial.println())
   
   // set ip to the right ip address
   pcClientIp = IPAddress(ipPieces[0], ipPieces[1], ipPieces[2], ipPieces[3]);

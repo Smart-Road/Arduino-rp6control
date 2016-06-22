@@ -8,7 +8,7 @@
 
    Made by: Rick van Schijndel
    Creation date: 8-4-2016
-   Last modified: 21-6-2016
+   Last modified: 22-6-2016
    by: Rick van Schijndel
 */
 
@@ -22,26 +22,29 @@
 
 #define DEBUG (1)
 
+#if DEBUG == 1
+#define DEBUG(x) (x);
+#else
+#define DEBUG(x) ;// nothing
+#endif
+
 enum class State { Forward, Backward, Left, Right, Startup };
 State state = State::Startup;
 SoftwareSerial Comport(D7, D8);
 
 int robotSpeed = 0;
-float invertedRotateSpeed = 0; // can be 0 to 1, the higher it is, the slower the robot rotates
+float invertedRotateSpeed = 1.0; // can be 0 to 1, the higher it is, the slower the robot rotates
 
 const int serverPortnumber = 80;
-// Create an instance of the server
-// specify the port to listen on as an argument
 WiFiServer server(serverPortnumber);
 
 const uint32_t maxClientCount = 20;
-
 WiFiClient client[maxClientCount];
 const size_t clientsize = sizeof(client) / sizeof (client[0]);
+
 bool connectionlist[clientsize];
 
 const uint32_t notInitializedController = 255;
-
 uint32_t controller = notInitializedController;
 
 const int pcClientPortnumber = 13;
@@ -69,27 +72,26 @@ void setup() {
 
   Comport.begin(9600);
   // Connect to WiFi network
-  DebugPrintln("");
-  DebugPrintln("");
-  DebugPrint("Connecting to ");
-  DebugPrintln(ssid);
+  DEBUG(Serial.println())
+  DEBUG(Serial.println())
+  DEBUG(Serial.printf("Connecting to %s\n", ssid))
 
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    DebugPrint(".");
+    DEBUG(Serial.print("."))
   }
-  DebugPrintln("");
-  DebugPrintln("WiFi connected");
+  DEBUG(Serial.println())
+  DEBUG(Serial.println("WiFi connected"))
 
   // Start the server
   server.begin();
-  DebugPrintln("Server started");
+  DEBUG(Serial.println("Server started"))
 
   // Print the IP address
-  Serial.println(WiFi.localIP()); // does not work with debugprintln, and is pretty handy anyway
+  Serial.println(WiFi.localIP()); // print this always
 }
 
 void loop() {
@@ -120,44 +122,37 @@ void connection() {
   static size_t clientCounter = 0;
   static int connectionTryCounter = 0;
   const int connectionTries = 1;
-  
+
   connectionWithPc = pcClient.connected();
-  if (!connectionWithPc && pcClientIp != IPAddress(0,0,0,0) && connectionTryCounter < connectionTries) {
-    
+  if (!connectionWithPc && pcClientIp != IPAddress(0, 0, 0, 0) && connectionTryCounter < connectionTries) {
+
     connectionWithPc = true;
     if (pcClient.connect(pcClientIp, pcClientPortnumber)) {
       connectionTryCounter = 0;
-      
-      DebugPrintln("hello connection with pc client!");
+
+      DEBUG(Serial.println("hello connection with pc client!"))
       SendMessage(pcClient, "zone:15");
     } else {
       connectionTryCounter++;
-      DebugPrintln("trycounter got up by one");
+      DEBUG(Serial.println("trycounter got up by one"))
     }
   } else if (connectionTryCounter == 1) { // only for debugging
     connectionTryCounter++;
-    DebugPrintln("Stopped trying to connect");
+    DEBUG(Serial.println("Stopped trying to connect"))
   }
-  
+
   if (server.hasClient())
   {
     if (client[clientCounter] == 0 ||
         !client[clientCounter].connected())
     {
       client[clientCounter] = server.available();
-      //Serial.printf("Client(%d) has connected.\n", clientCounter);
-      DebugPrint("Client(");
-      DebugPrint(String(clientCounter));
-      DebugPrintln(") has connected.");
+      DEBUG(Serial.printf("Client(%d) has connected.\n", clientCounter))
       connectionlist[clientCounter] = true;
     }
     else
     {
-      //Serial.printf("ERROR: Client(%d) still connected.\n", clientCounter);
-      DebugPrint("ERROR: Client(");
-      DebugPrint(String(clientCounter));
-      DebugPrintln(") still connected.");
-      DebugPrintln("Trying next client.");
+      DEBUG(Serial.printf("ERROR: Client(%d) still connected.\nTrying next client.\n", clientCounter))
     }
     clientCounter++;
     clientCounter = clientCounter % clientsize;
@@ -178,31 +173,30 @@ void connection() {
       if (!connectionlist[j])
       {
         if (j == controller) {
-          DebugPrintln("Controller disconnected.");
+          DEBUG(Serial.println("Controller disconnected."))
           controller = -1;
           connectionTryCounter = 0;
-          pcClientIp = IPAddress(0, 0, 0, 0);
+          // reset connection with pc?
+          //pcClientIp = IPAddress(0, 0, 0, 0);
         }
-        //Serial.printf("Client(%d) has disconnected.\n", j);
-        DebugPrint("Client(");
-        DebugPrint(String(j));
-        DebugPrintln(") has disconnected.");
+        DEBUG(Serial.printf("Client(%d) has disconnected.\n", j))
       }
     }
-    if (j == controller) {
-      if (commandline.length() > 0) {
+    if (commandline.length() > 0) {
+      if (j == controller) {
         useCommand(commandline);
+      } else if ( controller == notInitializedController) { // if controller is not set and a message is received
+        if (checkAndSetController(commandline, j)) {
+          SendMessage(client[j], "CONTROL:GRANTED");
+        } else { // message was wrong (not CONTROL:)
+          client[j].stop();
+        }
+      } else { // if client is not the controller and the controller is already set
+        SendMessage(client[j], "ACCESS:DENIED");
+        client[j].stop();
       }
-    } else if ( controller == notInitializedController) {
-      if (checkAndSetController(commandline, j)) {
-        SendMessage(client[j], "CONTROL:GRANTED");
-      } else {
-        SendMessage(client[j], "CONTROL:DENIED");
-      }
-    } else {
-      client[j].stop();
+      commandline = "";
     }
-    commandline = "";
   }
 }
 
