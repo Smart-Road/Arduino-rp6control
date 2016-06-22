@@ -190,7 +190,6 @@ void connection() {
           SendMessage(client[j], "CONTROL:GRANTED");
         } else { // message was wrong (not CONTROL:)
           SendMessage(client[j], "ACCESS:DENIED");
-          client[j].stop();
         }
       } else { // if client is not the controller and the controller is already set
         SendMessage(client[j], "ACCESS:DENIED");
