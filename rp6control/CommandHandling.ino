@@ -11,7 +11,7 @@
 
 void useCommand(const String sCommand) {
   int commands[2];
-  if (parseCommand(sCommand, commands) != 0) {
+  if (!parseCommand(sCommand, commands)) {
     DebugPrintln("parsing command " + sCommand + " failed");
     return;
   }
@@ -52,15 +52,15 @@ void useCommand(const String sCommand) {
   }
 }
 
-int parseCommand(const String command, int commands[2]) { // commands has to be of sizeof(int) * 2
+bool parseCommand(const String command, int commands[2]) { // commands has to be of sizeof(int) * 2
   if (command == NULL) {
-    return -1;
+    return false;
   }
   int paramcheck = command.indexOf(":");
   if (paramcheck < 0) { // if no parameter is given
     DebugPrint("ERROR:Command without parameter was given to parser:");
     DebugPrintln(command);
-    return -1;
+    return false;
   }
 
   // parse command
@@ -77,7 +77,7 @@ int parseCommand(const String command, int commands[2]) { // commands has to be 
   } else if (beginCommand == "SERVERIP") {
     commands[0] = SERVERIP;
   } else {
-    return -1;
+    return false;
   }
 
   // parse parameter
@@ -92,7 +92,7 @@ int parseCommand(const String command, int commands[2]) { // commands has to be 
     } else if (parameter == "BACKWARD") {
       commands[1] = BACKWARD;
     } else {
-      return -1;
+      return false;
     }
   } else if (commands[0] == SPEED || commands[0] == ANGLE) {
     commands[1] = parameter.toInt();
@@ -102,10 +102,10 @@ int parseCommand(const String command, int commands[2]) { // commands has to be 
     commands[1] = 1130; // does not matter
   } else {
     DebugPrintln("command has value of:" + String(commands[0]) + ", which is unknown");
-    return -1;
+    return false;
   }
-
-  return 0;
+  
+  return true;
 }
 
 String getParamString(const String command) {

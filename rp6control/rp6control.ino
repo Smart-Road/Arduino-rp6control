@@ -40,7 +40,9 @@ WiFiClient client[maxClientCount];
 const size_t clientsize = sizeof(client) / sizeof (client[0]);
 bool connectionlist[clientsize];
 
-int controller = -1;
+const uint32_t notInitializedController = 255;
+
+uint32_t controller = notInitializedController;
 
 const int pcClientPortnumber = 13;
 IPAddress pcClientIp(0, 0, 0, 0); // should be 0,0,0,0
@@ -191,8 +193,12 @@ void connection() {
       if (commandline.length() > 0) {
         useCommand(commandline);
       }
-    } else if ( controller < 0) {
-      checkAndSetController(commandline, j);
+    } else if ( controller == notInitializedController) {
+      if (checkAndSetController(commandline, j)) {
+        SendMessage(client[j], "CONTROL:GRANTED");
+      } else {
+        SendMessage(client[j], "CONTROL:DENIED");
+      }
     } else {
       client[j].stop();
     }

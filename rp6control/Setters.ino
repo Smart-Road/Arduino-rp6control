@@ -29,10 +29,10 @@ void setTurningAngle(int angle) {
   DebugPrintln(String(invertedRotateSpeed));
 }
 
-void checkAndSetController(const String sCommand, int clientId) {
+bool checkAndSetController(const String sCommand, int clientId) {
   int commands[2];
-  if (parseCommand(sCommand, commands) != 0) {
-    return;
+  if (!parseCommand(sCommand, commands)) {
+    return false;
   }
 
   int command = commands[0];
@@ -42,7 +42,9 @@ void checkAndSetController(const String sCommand, int clientId) {
     DebugPrint("Controller (");
     DebugPrint(sController);
     DebugPrintln(") connected.");
+    return true;
   }
+  return false;
 }
 
 void parseAndSetServerIp(String sIp) {
