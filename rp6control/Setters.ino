@@ -12,7 +12,7 @@ void setRobotSpeed(int speedParam) {
 
 void setTurningAngle(int angle) {
   if (angle < 0 || angle > 100) {
-    DEBUGCODE(Serial.println("An error occured"));
+    DEBUGCODE(Serial.println("An error occured in setTurningAngle"));
     return;
   }
   float angleFloat = angle;
@@ -23,7 +23,7 @@ void setTurningAngle(int angle) {
 
 bool checkAndSetController(const String sCommand, int clientId) {
   long commands[2];
-  if (!parseCommand(sCommand, commands) != 0) {
+  if (!parseCommand(sCommand, commands)) {
     return false;
   }
 

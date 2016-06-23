@@ -20,6 +20,7 @@ void useCommand(const String sCommand)
       break;
     case MAXSPEED:
       setMaxSpeed(parameter);
+      break;
     case DIRECTION:
       switch (parameter) {
         case LEFT:
