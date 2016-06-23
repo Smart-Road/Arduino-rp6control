@@ -25,7 +25,7 @@
 #if DEBUG == 1
 #define DEBUGCODE(x) (x) // add ; to the end, because it did not look good if ; was between the () of the macro
 #else
-#define DEBUGCODE(x) ; // nothing
+#define DEBUGCODE(x) // nothing
 #endif
 
 enum class State { Forward, Backward, Left, Right, Startup };
@@ -38,7 +38,7 @@ float invertedRotateSpeed = 1.0; // can be 0 to 1, the higher it is, the slower 
 const int serverPortnumber = 80;
 WiFiServer server(serverPortnumber);
 
-const uint32_t maxClientCount = 20;
+const uint32_t maxClientCount = 10;
 WiFiClient client[maxClientCount];
 const size_t clientsize = sizeof(client) / sizeof (client[0]);
 
