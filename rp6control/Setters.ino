@@ -73,5 +73,9 @@ void setMaxSpeed(int newMaxSpeed) {
   }
   maxSpeed = newMaxSpeed;
   setRobotSpeed(cruiseSpeed); // set robot speed again, so if the speed was too high, the speed will be lowered to the right max speed
+  
+  if (controller != notInitializedController) {
+    SendMessage(client[controller], "MAXSPEED:" + String(newMaxSpeed));
+  }
 }
 
