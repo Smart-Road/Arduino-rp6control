@@ -12,7 +12,7 @@
 void useCommand(const String sCommand) {
   int commands[2];
   if (!parseCommand(sCommand, commands)) {
-    DEBUG(Serial.println("parsing command " + sCommand + " failed"))
+    DEBUGCODE(Serial.println("parsing command " + sCommand + " failed"))
     return;
   }
 
@@ -47,7 +47,7 @@ void useCommand(const String sCommand) {
       }
       break;
     default:
-      DEBUG(Serial.println("An error occured"))
+      DEBUGCODE(Serial.println("An error occured"))
       break;
   }
 }
@@ -58,8 +58,8 @@ bool parseCommand(const String command, int commands[2]) { // commands has to be
   }
   int paramcheck = command.indexOf(":");
   if (paramcheck < 0) { // if no parameter is given
-    DEBUG(Serial.print("ERROR:Command without parameter was given to parser:"))
-    DEBUG(Serial.println(command))
+    DEBUGCODE(Serial.print("ERROR:Command without parameter was given to parser:"))
+    DEBUGCODE(Serial.println(command))
     return false;
   }
 
@@ -101,7 +101,7 @@ bool parseCommand(const String command, int commands[2]) { // commands has to be
   } else if (commands[0] == SERVERIP) {
     commands[1] = 1130; // does not matter
   } else {
-    DEBUG(Serial.printf("command has value of:%d, which is unknown.\n", commands[0]))
+    DEBUGCODE(Serial.printf("command has value of:%d, which is unknown.\n", commands[0]))
     return false;
   }
   
@@ -111,7 +111,7 @@ bool parseCommand(const String command, int commands[2]) { // commands has to be
 String getParamString(const String command) {
   int endCommand = command.indexOf(":");
   if (endCommand < 0 || endCommand == command.length() - 1) {
-    DEBUG(Serial.println("Error occured in getParamString, no parameter found"))
+    DEBUGCODE(Serial.println("Error occured in getParamString, no parameter found"))
     return "";
   }
   String parameter = command.substring(endCommand + 1);

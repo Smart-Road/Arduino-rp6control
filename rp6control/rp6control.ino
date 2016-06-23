@@ -23,9 +23,9 @@
 #define DEBUG (1)
 
 #if DEBUG == 1
-#define DEBUG(x) (x);
+#define DEBUGCODE(x) (x); // add ; to the end, because it did not look good if ; was between the () of the macro
 #else
-#define DEBUG(x) ;// nothing
+#define DEBUGCODE(x) ;// nothing
 #endif
 
 enum class State { Forward, Backward, Left, Right, Startup };
@@ -72,23 +72,23 @@ void setup() {
 
   Comport.begin(9600);
   // Connect to WiFi network
-  DEBUG(Serial.println())
-  DEBUG(Serial.println())
-  DEBUG(Serial.printf("Connecting to %s\n", ssid))
+  DEBUGCODE(Serial.println())
+  DEBUGCODE(Serial.println())
+  DEBUGCODE(Serial.printf("Connecting to %s\n", ssid))
 
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    DEBUG(Serial.print("."))
+    DEBUGCODE(Serial.print("."))
   }
-  DEBUG(Serial.println())
-  DEBUG(Serial.println("WiFi connected"))
+  DEBUGCODE(Serial.println())
+  DEBUGCODE(Serial.println("WiFi connected"))
 
   // Start the server
   server.begin();
-  DEBUG(Serial.println("Server started"))
+  DEBUGCODE(Serial.println("Server started"))
 
   // Print the IP address
   Serial.println(WiFi.localIP()); // print this always
@@ -130,15 +130,15 @@ void connection() {
     if (pcClient.connect(pcClientIp, pcClientPortnumber)) {
       connectionTryCounter = 0;
 
-      DEBUG(Serial.println("hello connection with pc client!"))
+      DEBUGCODE(Serial.println("hello connection with pc client!"))
       SendMessage(pcClient, "zone:15");
     } else {
       connectionTryCounter++;
-      DEBUG(Serial.println("trycounter got up by one"))
+      DEBUGCODE(Serial.println("trycounter got up by one"))
     }
   } else if (connectionTryCounter == 1) { // only for debugging
     connectionTryCounter++;
-    DEBUG(Serial.println("Stopped trying to connect"))
+    DEBUGCODE(Serial.println("Stopped trying to connect"))
   }
 
   if (server.hasClient())
@@ -147,12 +147,12 @@ void connection() {
         !client[clientCounter].connected())
     {
       client[clientCounter] = server.available();
-      DEBUG(Serial.printf("Client(%d) has connected.\n", clientCounter))
+      DEBUGCODE(Serial.printf("Client(%d) has connected.\n", clientCounter))
       connectionlist[clientCounter] = true;
     }
     else
     {
-      DEBUG(Serial.printf("ERROR: Client(%d) still connected.\nTrying next client.\n", clientCounter))
+      DEBUGCODE(Serial.printf("ERROR: Client(%d) still connected.\nTrying next client.\n", clientCounter))
     }
     clientCounter++;
     clientCounter = clientCounter % clientsize;
@@ -173,13 +173,13 @@ void connection() {
       if (!connectionlist[j])
       {
         if (j == controller) {
-          DEBUG(Serial.println("Controller disconnected."))
+          DEBUGCODE(Serial.println("Controller disconnected."))
           controller = -1;
           connectionTryCounter = 0;
           // reset connection with pc?
           //pcClientIp = IPAddress(0, 0, 0, 0);
         }
-        DEBUG(Serial.printf("Client(%d) has disconnected.\n", j))
+        DEBUGCODE(Serial.printf("Client(%d) has disconnected.\n", j))
       }
     }
     if (commandline.length() > 0) {
