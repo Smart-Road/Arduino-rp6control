@@ -18,7 +18,9 @@ SerialCommunication::SerialCommunication() {
 }
 
 String SerialCommunication::getCommand() {
-  if (!_isStarted) { return "NOT_STARTED_ERROR"; }
+  if (!_isStarted) {
+    return "NOT_STARTED_ERROR";
+  }
   return _lastCommand;
 }
 
@@ -31,7 +33,7 @@ void SerialCommunication::begin(Stream &theStream, char beginDelimiter, char end
 
 bool SerialCommunication::update() {
   if (!_isStarted) {
-	return false;
+    return false;
   }
   while (_deviceToCommunicateWith->available() > 0) {
     _incomingChar = _deviceToCommunicateWith->read();

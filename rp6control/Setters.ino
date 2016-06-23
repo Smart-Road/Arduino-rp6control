@@ -25,7 +25,7 @@ void setTurningAngle(int angle) {
 }
 
 bool checkAndSetController(const String sCommand, int clientId) {
-  int commands[2];
+  long commands[2];
   if (!parseCommand(sCommand, commands) != 0) {
     return false;
   }
