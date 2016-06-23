@@ -1,16 +1,13 @@
-const int maxRobotSpeed = 200;
-const int minRobotSpeed = 0;
-
 void setRobotSpeed(int speedParam) {
-  speedParam = map(speedParam, 0, 130, minRobotSpeed, maxRobotSpeed);
-  if (speedParam >= minRobotSpeed && speedParam <= maxRobotSpeed) {
-    robotSpeed = speedParam;
-  } else if (speedParam > maxRobotSpeed) {
-    robotSpeed = maxRobotSpeed;
+  if (speedParam >= 0 && speedParam <= maxSpeed) {
+    cruiseSpeed = speedParam;
+  } else if (speedParam > maxSpeed) {
+    DEBUGCODE(Serial.println("Speed higher than maxSpeed was tried to be set, reverting to maxSpeed"));
+    cruiseSpeed = maxSpeed;
   } else {
-    robotSpeed = 0;
+    cruiseSpeed = 0;
   }
-  DEBUGCODE(Serial.printf("Speed set to %d\n", robotSpeed));
+  DEBUGCODE(Serial.printf("Speed set to %d\n", cruiseSpeed));
 }
 
 void setTurningAngle(int angle) {
@@ -18,8 +15,8 @@ void setTurningAngle(int angle) {
     DEBUGCODE(Serial.println("An error occured"));
     return;
   }
-  double angleDouble = angle;
-  double rotateSpeed = angleDouble / 100;
+  float angleFloat = angle;
+  float rotateSpeed = angleFloat / 100;
   invertedRotateSpeed = 1.0 - rotateSpeed;
   DEBUGCODE(Serial.println("Inverted angle:" + String(invertedRotateSpeed)));
 }
@@ -64,8 +61,17 @@ void parseAndSetServerIp(String sIp) {
     DEBUGCODE(Serial.print(String(ipPieces[i]) + " "));
   }
   DEBUGCODE(Serial.println());
-  
+
   // set ip to the right ip address
   pcClientIp = IPAddress(ipPieces[0], ipPieces[1], ipPieces[2], ipPieces[3]);
+}
+
+void setMaxSpeed(int newMaxSpeed) {
+  if (newMaxSpeed < MAXSPEEDMIN || newMaxSpeed > MAXSPEEDMAX) {
+    DEBUGCODE(Serial.printf("Invalid max speed received:%d", newMaxSpeed));
+    return;
+  }
+  maxSpeed = newMaxSpeed;
+  setRobotSpeed(cruiseSpeed); // set robot speed again, so if the speed was too high, the speed will be lowered to the right max speed
 }
 

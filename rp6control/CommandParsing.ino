@@ -25,6 +25,8 @@ bool parseCommand(const String command, long commands[2]) // commands has to be 
     commands[0] = SERVERIP;
   } else if (beginCommand == "RFID") {
     commands[0] = RFID;
+  } else if (beginCommand == "MAXSPEED") {
+    commands[0] = MAXSPEED;
   } else {
     return false;
   }
@@ -44,11 +46,14 @@ bool parseCommand(const String command, long commands[2]) // commands has to be 
       return false;
     }
   } else if (commands[0] == SPEED ||
-             commands[0] == ANGLE) {
+             commands[0] == ANGLE ||
+             commands[0] == MAXSPEED
+             ) {
     commands[1] = parameter.toInt();
   } else if (commands[0] == CONTROL ||
              commands[0] == SERVERIP ||
-             commands[0] == RFID) {
+             commands[0] == RFID
+             ) {
     // command is valid, second arg is a string. use getparamstring
     // commands[1] is undefined
   } else {

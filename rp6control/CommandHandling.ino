@@ -18,6 +18,12 @@ void useCommand(const String sCommand)
     case SERVERIP:
       parseAndSetServerIp(getParamString(sCommand));
       break;
+    case MAXSPEED:
+      // check if parameter is correct
+      setMaxSpeed(parameter);
+      if (controller != notInitializedController) {
+        // send message to controller with maxspeed
+      }
     case DIRECTION:
       switch (parameter) {
         case LEFT:

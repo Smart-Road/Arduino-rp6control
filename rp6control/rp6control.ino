@@ -19,6 +19,7 @@
 #define CONTROL (4)
 #define SERVERIP (5)
 #define RFID (6)
+#define MAXSPEED (7)
 
 #define RIGHT (10)
 #define LEFT (11)
@@ -41,12 +42,17 @@
 #define DEBUGCODE(x) // nothing
 #endif
 
+#define MAXSPEEDMIN (5)
+#define MAXSPEEDMAX (130)
+
 enum class State { Forward, Backward, Left, Right, Startup };
 State state = State::Startup;
 SoftwareSerial SerialRfidReader(D7, D8);
 
-int robotSpeed = 0;
+int cruiseSpeed = 0;
 float invertedRotateSpeed = 1.0; // can be 0 to 1, the higher it is, the slower the robot rotates
+
+int maxSpeed = 130; // init max speed on 130
 
 const int serverPortnumber = 80;
 WiFiServer server(serverPortnumber);
