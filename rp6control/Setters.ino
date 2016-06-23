@@ -10,18 +10,18 @@ void setRobotSpeed(int speedParam) {
   } else {
     robotSpeed = 0;
   }
-  DEBUGCODE(Serial.printf("Speed set to %d\n", robotSpeed))
+  DEBUGCODE(Serial.printf("Speed set to %d\n", robotSpeed));
 }
 
 void setTurningAngle(int angle) {
   if (angle < 0 || angle > 100) {
-    DEBUGCODE(Serial.println("An error occured"))
+    DEBUGCODE(Serial.println("An error occured"));
     return;
   }
   double angleDouble = angle;
   double rotateSpeed = angleDouble / 100;
   invertedRotateSpeed = 1.0 - rotateSpeed;
-  DEBUGCODE(Serial.printf("Inverted angle:%f\n", invertedRotateSpeed))
+  DEBUGCODE(Serial.printf("Inverted angle:%f\n", invertedRotateSpeed));
 }
 
 bool checkAndSetController(const String sCommand, int clientId) {
@@ -34,7 +34,7 @@ bool checkAndSetController(const String sCommand, int clientId) {
   if (command == CONTROL) {
     controller = clientId;
     String sController = getParamString(sCommand);
-    DEBUGCODE(Serial.println("Controller(" + sController + ") connected."))
+    DEBUGCODE(Serial.println("Controller(" + sController + ") connected."));
     return true;
   }
   return false;
@@ -59,11 +59,11 @@ void parseAndSetServerIp(String sIp) {
   ipPieces[3] = s.toInt();
 
   // debug print all values of ipPieces
-  DEBUGCODE(Serial.print("Ip address values:"))
+  DEBUGCODE(Serial.print("Ip address values:"));
   for (int i = 0; i < ipPiecesSize; i++) {
-    DEBUGCODE(Serial.print(String(ipPieces[i]) + " "))
+    DEBUGCODE(Serial.print(String(ipPieces[i]) + " "));
   }
-  DEBUGCODE(Serial.println())
+  DEBUGCODE(Serial.println());
   
   // set ip to the right ip address
   pcClientIp = IPAddress(ipPieces[0], ipPieces[1], ipPieces[2], ipPieces[3]);
