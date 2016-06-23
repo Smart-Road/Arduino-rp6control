@@ -19,7 +19,6 @@ void useCommand(const String sCommand)
       parseAndSetServerIp(getParamString(sCommand));
       break;
     case MAXSPEED:
-      // check if parameter is correct
       setMaxSpeed(parameter);
     case DIRECTION:
       switch (parameter) {
