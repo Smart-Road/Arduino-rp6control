@@ -52,7 +52,7 @@ bool parseCommand(const String command, long commands[2]) // commands has to be 
     // command is valid, second arg is a string. use getparamstring
     // commands[1] is undefined
   } else {
-    DEBUGCODE(Serial.printf("command has value of:%d, which is unknown.\n", commands[0]));
+    DEBUGCODE(Serial.printf("command has value of:%ld, which is unknown.\n", commands[0]));
     return false;
   }
 

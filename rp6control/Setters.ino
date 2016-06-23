@@ -21,7 +21,7 @@ void setTurningAngle(int angle) {
   double angleDouble = angle;
   double rotateSpeed = angleDouble / 100;
   invertedRotateSpeed = 1.0 - rotateSpeed;
-  DEBUGCODE(Serial.printf("Inverted angle:%f\n", invertedRotateSpeed));
+  DEBUGCODE(Serial.println("Inverted angle:" + String(invertedRotateSpeed)));
 }
 
 bool checkAndSetController(const String sCommand, int clientId) {

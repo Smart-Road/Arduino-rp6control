@@ -55,7 +55,7 @@ void networkConnection()
       {
         if (j == controller) {
           DEBUGCODE(Serial.println("Controller disconnected."));
-          controller = -1;
+          controller = notInitializedController;
           connectionTryCounter = 0;
           // reset connection with pc?
           //pcClientIp = IPAddress(0, 0, 0, 0);
